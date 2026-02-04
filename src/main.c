@@ -89,7 +89,7 @@ char** get_args(const char* params) {
 void echo_command(char** args) {
   if (args != NULL) {
     for (int i = 0; args[i] != NULL; i++) {
-      printf("%s", args[i]);
+      printf("%s ", args[i]);
     }
     printf("\n");
   }

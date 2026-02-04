@@ -7,7 +7,6 @@
 
 char* get_command(char* c);
 char** get_args(const char* params);
-int process_c(char* c);
 
 void echo_command(char** args);
 

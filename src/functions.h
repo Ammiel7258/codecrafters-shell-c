@@ -10,7 +10,7 @@ char* get_command(const char* c);
 char** get_args(const char* params);
 
 int echo_command(char** args);
-int type_command(char** args);
-int exit_command();
+int type_command(const char* command_str, char** args);
+void exit_command();
 
 #endif //CODECRAFTERS_SHELL_FUNCTIONS_H

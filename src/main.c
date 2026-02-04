@@ -18,7 +18,6 @@ int main() {
 
     char* command_str = get_command(input);
     char** args = get_args(input);
-
     const enum Command command = parse_command(command_str);
 
     switch (command) {
@@ -26,13 +25,15 @@ int main() {
         echo_command(args);
         break;
       case TYPE:
-        type_command(args);
+        type_command(command_str, args);
+        break;
+      case UNKNOWN:
+        printf("%s: command not found\n", command_str);
         break;
       case EXIT:
         exit_command();
         break;
-      case UNKNOWN:
-        printf("%s: command not found\n", command_str);
+      default:
         break;
     }
 
@@ -116,15 +117,26 @@ int echo_command(char** args) {
   return 1;
 }
 
-int exit_command() {
+void exit_command() {
   exit(0);
 }
 
-int type_command(char** args) {
-  /*
-   * i need a way to know if the command is valid or not
-   */
-  
+int type_command(const char* command_str, char** args) {
+  if (args == NULL) return -1;
+
+  for (int i = 0; args[i] != NULL; i++) {
+    const enum Command command = parse_command(args[i]);
+    switch (command) {
+      case ECHO:
+      case TYPE:
+      case EXIT:
+        printf("%s is a shell builtin\n", args[i]);
+        continue;
+      case UNKNOWN:
+        printf("%s: not found\n", args[i]);
+        continue;
+    }
+  }
 
   return 0;
 }

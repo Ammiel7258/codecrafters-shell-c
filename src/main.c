@@ -65,8 +65,10 @@ char** get_args(const char* params) {
    * make sure the last point is a NULL address
    * first space will be skipped because we do
    * not need the command just the args
+   * also allocate all memory to NULL
    */
   char** args = malloc((count) * sizeof(char*));
+  for (int i = 0; i < count; i++) args[i] = NULL;
 
   /*
    * assign token to each slot, starting with the
@@ -77,7 +79,7 @@ char** get_args(const char* params) {
   int i = 0;
   while (token != NULL) {
     token = strtok(NULL, " ");
-    args[i++] = strdup(token);
+    if (token != NULL) args[i++] = strdup(token);
   }
   free(copy);
 
@@ -87,7 +89,7 @@ char** get_args(const char* params) {
 void echo_command(char** args) {
   if (args != NULL) {
     for (int i = 0; args[i] != NULL; i++) {
-      printf("%s ", args[i]);
+      printf("%s", args[i]);
     }
     printf("\n");
   }

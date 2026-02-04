@@ -58,6 +58,7 @@ char** get_args(const char* params) {
     count++;
     token = strtok(NULL, " ");
   }
+  free(temp);
 
   /*
    * allocate memory for addresses to each word
@@ -78,7 +79,6 @@ char** get_args(const char* params) {
     token = strtok(NULL, " ");
     args[i++] = strdup(token);
   }
-  args[i] = NULL;
   free(copy);
 
   return args;
@@ -86,10 +86,9 @@ char** get_args(const char* params) {
 
 void echo_command(char** args) {
   if (args != NULL) {
-    // Iterate until we find the NULL pointer we added at the end
     for (int i = 0; args[i] != NULL; i++) {
-      printf("Argument %d: %s\n", i, args[i]);
+      printf("%s ", args[i]);
     }
+    printf("\n");
   }
-  printf("\n");
 }

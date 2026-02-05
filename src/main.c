@@ -25,15 +25,13 @@ int main() {
         echo_command(args);
         break;
       case TYPE:
-        type_command(command_str, args);
-        break;
-      case UNKNOWN:
-        printf("%s: command not found\n", command_str);
+        type_command(args);
         break;
       case EXIT:
         exit_command();
         break;
-      default:
+      case UNKNOWN:
+        printf("%s: command not found\n", command_str);
         break;
     }
 
@@ -106,6 +104,28 @@ char** get_args(const char* params) {
   return args;
 }
 
+char** get_paths() {
+  const char* path = getenv("PATH");
+  // printf("%s\n", path);
+  const char* delim = ":;";
+  char* temp = strdup(path);
+  const char* token = strtok(temp, delim);
+  int count = 0;
+  while (token != NULL) {
+    printf("%s\n", token);
+    count++;
+    token = strtok(NULL, delim);
+  }
+  free(temp);
+
+  char** paths = malloc((count) * sizeof(char*));
+  // for (int i = 0; i < count; i++) paths[i] = NULL;
+
+  char* copy = strdup(path);
+
+  return paths;
+}
+
 int echo_command(char** args) {
   if (args != NULL) {
     for (int i = 0; args[i] != NULL; i++) {
@@ -114,6 +134,7 @@ int echo_command(char** args) {
     printf("\n");
     return 0;
   }
+
   return 1;
 }
 
@@ -121,7 +142,7 @@ void exit_command() {
   exit(0);
 }
 
-int type_command(const char* command_str, char** args) {
+int type_command(char** args) {
   if (args == NULL) return -1;
 
   for (int i = 0; args[i] != NULL; i++) {
@@ -132,9 +153,13 @@ int type_command(const char* command_str, char** args) {
       case EXIT:
         printf("%s is a shell builtin\n", args[i]);
         continue;
-      case UNKNOWN:
+      case UNKNOWN: {
+        char** paths = get_paths();
+        free(paths);
         printf("%s: not found\n", args[i]);
-        continue;
+      }
+      default:
+        return 1;
     }
   }
 

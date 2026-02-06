@@ -106,13 +106,12 @@ char** get_args(const char* params) {
 
 char** get_paths() {
   const char* path = getenv("PATH");
-  // printf("%s\n", path);
   const char* delim = ":;";
   char* temp = strdup(path);
   const char* token = strtok(temp, delim);
+
   int count = 0;
   while (token != NULL) {
-    printf("%s\n", token);
     count++;
     token = strtok(NULL, delim);
   }
@@ -122,6 +121,14 @@ char** get_paths() {
   // for (int i = 0; i < count; i++) paths[i] = NULL;
 
   char* copy = strdup(path);
+  int i = 0;
+  token = strtok(copy, delim);
+  while (token != NULL) {
+    token = strtok(NULL, delim);
+    if (token != NULL) paths[i++] = strdup(token);
+  }
+  paths[i] = NULL;
+  free(copy);
 
   return paths;
 }
@@ -154,9 +161,16 @@ int type_command(char** args) {
         printf("%s is a shell builtin\n", args[i]);
         continue;
       case UNKNOWN: {
+        int found = 0;
         char** paths = get_paths();
+        for (int j = 0; paths[j] != NULL; j++) {
+          if (strcmp(paths[j], args[i]) == 0) {
+            found++;
+          }
+          printf("%s\n", paths[j]);
+        }
         free(paths);
-        printf("%s: not found\n", args[i]);
+        if (found == 0) printf("%s: not found\n", args[i]);
       }
       default:
         return 1;

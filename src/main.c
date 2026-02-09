@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <limits.h>
 #include "functions.h"
 
 enum Command { UNKNOWN, ECHO, EXIT, TYPE };
@@ -152,6 +154,7 @@ void exit_command() {
 int type_command(char** args) {
   if (args == NULL) return -1;
 
+  // iterate through all the arguments provided in CLI
   for (int i = 0; args[i] != NULL; i++) {
     const enum Command command = parse_command(args[i]);
     switch (command) {
@@ -162,12 +165,16 @@ int type_command(char** args) {
         continue;
       case UNKNOWN: {
         int found = 0;
+        char full_path[PATH_MAX];
         char** paths = get_paths();
+
         for (int j = 0; paths[j] != NULL; j++) {
-          if (strcmp(paths[j], args[i]) == 0) {
+          snprintf(full_path, sizeof(full_path), "%s%s%s", paths[j], "/", args[i]);
+          if (access(full_path, X_OK) == 0) {
+            printf("%s is %s\n", args[i], full_path);
             found++;
+            break;
           }
-          printf("%s\n", paths[j]);
         }
         free(paths);
         if (found == 0) printf("%s: not found\n", args[i]);

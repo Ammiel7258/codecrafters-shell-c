@@ -72,11 +72,12 @@ char* get_command(const char* c) {
 char** get_args(const char* params) {
   // find out how many arguments are in params
   char* temp = strdup(params);
-  const char* token = strtok(temp, " ");
+  const char* delim = " ";
+  const char* token = strtok(temp, delim);
   int count = 0;
   while (token != NULL) {
     count++;
-    token = strtok(NULL, " ");
+    token = strtok(NULL, delim);
   }
   free(temp);
 
@@ -106,33 +107,57 @@ char** get_args(const char* params) {
   return args;
 }
 
-char** get_paths() {
-  const char* path = getenv("PATH");
+char* get_executable(const char* exe) {
+  const char* path_env = getenv("PATH");
+  if (path_env == NULL) return NULL;
+
+  char* copy = strdup(path_env);
   const char* delim = ":;";
-  char* temp = strdup(path);
-  const char* token = strtok(temp, delim);
+  const char* token = strtok(copy, delim);
 
-  int count = 0;
+  char full_path[PATH_MAX];
   while (token != NULL) {
-    count++;
+    snprintf(full_path, sizeof(full_path), "%s/%s", token, exe);
+
+    if (access(full_path, X_OK) == 0) {
+      char* result = strdup(full_path);
+      free(copy);
+      return result;
+    }
+
     token = strtok(NULL, delim);
   }
-  free(temp);
 
-  char** paths = malloc((count) * sizeof(char*));
-  // for (int i = 0; i < count; i++) paths[i] = NULL;
+  return NULL;
+}
 
-  char* copy = strdup(path);
-  int i = 0;
-  token = strtok(copy, delim);
-  while (token != NULL) {
-    token = strtok(NULL, delim);
-    if (token != NULL) paths[i++] = strdup(token);
+int type_command(char** args) {
+  if (args == NULL) return 1;
+
+  // iterate through all the arguments provided in CLI
+  for (int i = 0; args[i] != NULL; i++) {
+    const enum Command command = parse_command(args[i]);
+    switch (command) {
+      case ECHO:
+      case TYPE:
+      case EXIT:
+        printf("%s is a shell builtin\n", args[i]);
+        continue;
+      case UNKNOWN: {
+        char* executable = get_executable(args[i]);
+        if (executable == NULL) {
+          printf("%s: not found\n", args[i]);
+          break;
+        }
+
+        printf("%s is %s\n", args[i], executable);
+        free(executable);
+        break;
+      }
+    }
   }
-  paths[i] = NULL;
-  free(copy);
 
-  return paths;
+  return 0;
 }
 
 int echo_command(char** args) {
@@ -149,41 +174,4 @@ int echo_command(char** args) {
 
 void exit_command() {
   exit(0);
-}
-
-int type_command(char** args) {
-  if (args == NULL) return -1;
-
-  // iterate through all the arguments provided in CLI
-  for (int i = 0; args[i] != NULL; i++) {
-    const enum Command command = parse_command(args[i]);
-    switch (command) {
-      case ECHO:
-      case TYPE:
-      case EXIT:
-        printf("%s is a shell builtin\n", args[i]);
-        continue;
-      case UNKNOWN: {
-        int found = 0;
-        char full_path[PATH_MAX];
-        char** paths = get_paths();
-
-        for (int j = 0; paths[j] != NULL; j++) {
-          snprintf(full_path, sizeof(full_path), "%s%s%s", paths[j], "/", args[i]);
-          if (access(full_path, X_OK) == 0) {
-            printf("%s is %s\n", args[i], full_path);
-            found++;
-            break;
-          }
-        }
-        free(paths);
-        if (found == 0) printf("%s: not found\n", args[i]);
-        break;
-      }
-      default:
-        return 1;
-    }
-  }
-
-  return 0;
 }

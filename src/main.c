@@ -178,6 +178,7 @@ int type_command(char** args) {
         }
         free(paths);
         if (found == 0) printf("%s: not found\n", args[i]);
+        break;
       }
       default:
         return 1;

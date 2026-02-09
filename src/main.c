@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <sys/wait.h>
 #include "functions.h"
 
 enum Command { UNKNOWN, ECHO, EXIT, TYPE };
@@ -32,9 +33,16 @@ int main() {
       case EXIT:
         exit_command();
         break;
-      case UNKNOWN:
-        printf("%s: command not found\n", command_str);
+      case UNKNOWN: {
+        // if not a builtin, try seeing if the command is an executable...
+        const int is_a_command = run_command(command_str, args);
+        if (is_a_command != 0) {
+          printf("%s: command not found\n", command_str);
+          break;
+        }
+
         break;
+      }
     }
 
     free(args);
@@ -96,10 +104,10 @@ char** get_args(const char* params) {
    * second token because first is the
    */
   char* copy = strdup(params);
-  token = strtok(copy, " ");
+  token = strtok(copy, delim);
   int i = 0;
   while (token != NULL) {
-    token = strtok(NULL, " ");
+    token = strtok(NULL, delim);
     if (token != NULL) args[i++] = strdup(token);
   }
   free(copy);
@@ -129,6 +137,23 @@ char* get_executable(const char* exe) {
   }
 
   return NULL;
+}
+
+int run_command(const char* cmd, char** args) {
+  if (cmd == NULL || args == NULL) return 1;
+  char* executable = get_executable(cmd);
+
+  const pid_t pid = fork();
+
+  if (pid == 0) {
+    execv(executable, args);
+    exit(-1);
+  }
+  else if (pid < 0) exit(-1);
+  else wait(NULL);
+
+  free(executable);
+  return 0;
 }
 
 int type_command(char** args) {

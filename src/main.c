@@ -142,6 +142,7 @@ char* get_executable(const char* exe) {
 int run_command(char* cmd, char** args) {
   if (cmd == NULL || args == NULL) return 1;
   char* executable = get_executable(cmd);
+  if (executable == NULL) return 1;
 
   const pid_t pid = fork();
 

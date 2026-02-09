@@ -35,7 +35,7 @@ int main() {
         break;
       case UNKNOWN: {
         // if not a builtin, try seeing if the command is an executable...
-        const int is_a_command = run_command(input);
+        const int is_a_command = run_command(command_str, args);
         if (is_a_command != 0) {
           printf("%s: command not found\n", command_str);
           break;
@@ -139,24 +139,31 @@ char* get_executable(const char* exe) {
   return NULL;
 }
 
-int run_command(char* input) {
-  if (input == NULL) return 1;
-  char* cmd = get_command(input);
+int run_command(char* cmd, char** args) {
+  if (cmd == NULL || args == NULL) return 1;
   char* executable = get_executable(cmd);
 
   const pid_t pid = fork();
 
   if (pid == 0) {
-    //execv requires
-    execv(executable, input);
-    free(cmd);
+    int count = 0;
+    while (args[count] != NULL) count++;
+
+    // allocate a chunk of memory that is size of cmd + args + null terminator
+    char** argv = malloc((count + 2) * sizeof(char*));
+    argv[0] = cmd;
+    for (int i = 0; i < count; i++) {
+      argv[i+1] = args[i];
+    }
+    argv[count+1] = NULL;
+
+    execv(executable, argv);
     exit(-1);
   }
   else if (pid < 0) exit(-1);
   else wait(NULL);
 
   free(executable);
-  free(cmd);
   return 0;
 }
 

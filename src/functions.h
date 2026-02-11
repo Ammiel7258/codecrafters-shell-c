@@ -10,6 +10,7 @@ char* get_command(const char* c);
 char** get_args(const char* params);
 char* get_executable(const char* exe);
 
+int pwd_command();
 int run_command(char* cmd, char** args);
 int type_command(char** args);
 int echo_command(char** args);

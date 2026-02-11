@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include "functions.h"
 
-enum Command { UNKNOWN, ECHO, EXIT, TYPE, PWD };
+enum Command { UNKNOWN, ECHO, EXIT, TYPE, PWD, CD };
 
 int main() {
   // Flush after every printf
@@ -35,6 +35,9 @@ int main() {
         break;
       case PWD:
         pwd_command();
+        break;
+      case CD:
+        cd_command(input);
         break;
       case UNKNOWN: {
         // if not a builtin, try seeing if the command is an executable...
@@ -67,6 +70,9 @@ enum Command parse_command(const char* command) {
   }
   else if (strcmp(command, "pwd") == 0) {
     return PWD;
+  }
+  else if (strcmp(command, "cd") == 0) {
+    return CD;
   }
   else {
     return UNKNOWN;
@@ -145,6 +151,14 @@ char* get_executable(const char* exe) {
   return NULL;
 }
 
+int cd_command(char* dir) {
+  // if there is more than one argument print error
+  printf("%s\n", dir);
+  // parse dir
+
+  return 0;
+}
+
 int pwd_command() {
   char cwd[PATH_MAX];
   if (getcwd(cwd, sizeof(cwd)) == NULL) {
@@ -193,6 +207,7 @@ int type_command(char** args) {
       case ECHO:
       case PWD:
       case TYPE:
+      case CD:
       case EXIT:
         printf("%s is a shell builtin\n", args[i]);
         continue;

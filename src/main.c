@@ -174,8 +174,8 @@ int cd_command(const char* dir) {
   }
 
   if (strcmp(path, "~") == 0) {
-    chdir(getenv("HOME"));
-    return 0;
+    free(path);
+    return chdir(getenv("HOME"));
   }
 
   if (chdir(path) != 0) {

@@ -168,7 +168,9 @@ int cd_command(const char* dir) {
   free(dir_copy);
 
   if (count != 2) {
-    printf("cd: too many arguments");
+    if (count > 2) {
+      printf("cd: too many arguments\n");
+    }
     free(path);
     return 1;
   }

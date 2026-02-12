@@ -46,7 +46,6 @@ int main() {
           printf("%s: command not found\n", command_str);
           break;
         }
-
         break;
       }
     }
@@ -151,7 +150,7 @@ char* get_executable(const char* exe) {
   return NULL;
 }
 
-int cd_command(char* dir) {
+int cd_command(const char* dir) {
   // if there is more than one argument print error
   char* dir_copy = strdup(dir);
   int count = 0;
@@ -172,6 +171,11 @@ int cd_command(char* dir) {
     printf("cd: too many arguments");
     free(path);
     return 1;
+  }
+
+  if (strcmp(path, "~") == 0) {
+    chdir(getenv("HOME"));
+    return 0;
   }
 
   if (chdir(path) != 0) {

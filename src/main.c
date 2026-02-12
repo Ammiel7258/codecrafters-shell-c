@@ -153,9 +153,34 @@ char* get_executable(const char* exe) {
 
 int cd_command(char* dir) {
   // if there is more than one argument print error
-  printf("%s\n", dir);
-  // parse dir
+  char* dir_copy = strdup(dir);
+  int count = 0;
+  const char* delim = " ";
+  const char* token = strtok(dir_copy, delim);
+  char* path = NULL;
 
+  while (token != NULL) {
+    count++;
+    if (count == 2) {
+      path = strdup(token);
+    }
+    token = strtok(NULL, delim);
+  }
+  free(dir_copy);
+
+  if (count != 2) {
+    printf("cd: too many arguments");
+    free(path);
+    return 1;
+  }
+
+  if (chdir(path) != 0) {
+    printf("cd: %s: No such file or directory\n", path);
+    free(path);
+    return 1;
+  }
+
+  free(path);
   return 0;
 }
 
